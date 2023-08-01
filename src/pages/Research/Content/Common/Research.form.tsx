@@ -252,7 +252,7 @@ const ResearchForm = observer((props: IProps) => {
                             </Flex>
                             <Flex sx={{ flexDirection: 'column' }} mb={3}>
                               <ResearchFormLabel>
-                                What category fits your research?
+                                Which categories fit your research?
                               </ResearchFormLabel>
                               <Field
                                 name="researchCategory"
@@ -271,9 +271,7 @@ const ResearchForm = observer((props: IProps) => {
                               />
                             </Flex>
                             <Flex sx={{ flexDirection: 'column' }} mb={3}>
-                              <ResearchFormLabel>
-                                Select tags for your research
-                              </ResearchFormLabel>
+                              <ResearchFormLabel>Select tags</ResearchFormLabel>
                               <Field
                                 name="tags"
                                 component={TagsSelectField}
