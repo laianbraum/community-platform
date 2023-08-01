@@ -5,7 +5,11 @@ import type {
   DBDoc,
   IModerationStatus,
 } from './common.models'
-import type { UserRole } from 'oa-shared'
+import type {
+  UserRole,
+  EmailNotificationFrequency,
+  NotificationType,
+} from 'oa-shared'
 export type { UserRole }
 import type { IUploadedFileMeta } from '../stores/storage'
 import type { IConvertedFileMeta } from '../types'
@@ -13,6 +17,7 @@ import type { IConvertedFileMeta } from '../types'
 export interface IUserState {
   user?: IUser
 }
+
 // IUser retains most of the fields from legacy users (omitting passwords),
 // and has a few additional fields. Note 'email' is excluded
 // _uid is unique/fixed identifier
@@ -41,18 +46,19 @@ export interface IUser {
   location?: ILocation | null
   year?: ISODateString
   stats?: IUserStats
-  /** keep a map of all howto ids that a user has voted as useful */
-  votedUsefulHowtos?: { [howtoId: string]: boolean }
-  /** keep a map of all Research ids that a user has voted as useful */
-  votedUsefulResearch?: { [researchId: string]: boolean }
+  notification_settings?: INotificationSettings
   notifications?: INotification[]
+  profileCreated?: ISODateString
+  profileCreationTrigger?: string
 }
 
-interface IUserBadges {
+export interface IUserBadges {
   verified: boolean
+  supporter?: boolean
 }
 
 interface IExternalLink {
+  key: string
   url: string
   label:
     | 'email'
@@ -71,7 +77,6 @@ interface IExternalLink {
 interface IUserStats {
   userCreatedHowtos: { [id: string]: IModerationStatus }
   userCreatedResearch: { [id: string]: IModerationStatus }
-  userCreatedEvents: { [id: string]: IModerationStatus }
 }
 
 export type IUserDB = IUser & DBDoc
@@ -81,15 +86,49 @@ export interface INotification {
   _created: string
   triggeredBy: {
     displayName: string
+    // this field is the userName of the user, which we use as a unique id as of https://github.com/ONEARMY/community-platform/pull/2479/files
     userId: string
   }
   relevantUrl?: string
   type: NotificationType
   read: boolean
+  notified: boolean
+  // email contains the id of the doc in the emails collection if the notification was included in
+  // an email or 'failed' if an email with this notification was attempted and encountered an error
+  email?: string
 }
 
-export type NotificationType =
-  | 'new_comment'
-  | 'howto_useful'
-  | 'new_comment_research'
-  | 'research_useful'
+// export const NotificationTypes = [
+//   'new_comment',
+//   'howto_useful',
+//   'howto_mention',
+//   'howto_approved',
+//   'howto_needs_updates',
+//   'map_pin_approved',
+//   'map_pin_needs_updates',
+//   'new_comment_research',
+//   'research_useful',
+//   'research_mention',
+//   'research_update',
+//   'research_approved',
+//   'research_needs_updates',
+// ] as const
+
+// export type NotificationType = typeof NotificationTypes[number]
+
+export type INotificationSettings = {
+  enabled?: {
+    [T in NotificationType]: boolean
+  }
+  emailFrequency: EmailNotificationFrequency
+}
+
+export type IBadgeUpdate = {
+  _id: string
+  badges?: IUserBadges
+}
+
+export type INotificationUpdate = {
+  _id: string
+  notifications?: INotification[]
+}

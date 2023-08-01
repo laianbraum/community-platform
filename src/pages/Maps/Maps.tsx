@@ -9,6 +9,7 @@ import { Box } from 'theme-ui'
 
 import './styles.css'
 
+import { logger } from '../../logger'
 import type { ILatLng } from 'src/models/maps.models'
 import { GetLocation } from 'src/utils/geolocation'
 import type { Map } from 'react-leaflet'
@@ -68,7 +69,7 @@ class MapsPage extends React.Component<IProps, IState> {
         lng: position.coords.longitude,
       })
     } catch (error) {
-      console.error(error)
+      logger.error(error)
       // do nothing if location cannot be retrieved
     }
   }
@@ -87,6 +88,7 @@ class MapsPage extends React.Component<IProps, IState> {
     // Only lookup if not already the active pin
     if (pinId && pinId !== this.props.mapsStore.activePin?._id) {
       const pin = await this.props.mapsStore.getPin(pinId)
+      if (pin._deleted) return
       this.props.mapsStore.setActivePin(pin)
     }
     // Center on the pin if first load

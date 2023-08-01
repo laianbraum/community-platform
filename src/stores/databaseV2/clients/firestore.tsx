@@ -1,13 +1,13 @@
 import type { IDBEndpoint, DBDoc } from 'src/models/common.models'
 import { firestore } from 'src/utils/firebase'
-import type { DBQueryOptions, AbstractDBClient } from '../types'
+import type { DBQueryOptions, AbstractDatabaseClient } from '../types'
 import type { Observer } from 'rxjs'
 import { Observable } from 'rxjs'
 import { DB_QUERY_DEFAULTS } from '../utils/db.utils'
 
 const db = firestore
 
-export class FirestoreClient implements AbstractDBClient {
+export class FirestoreClient implements AbstractDatabaseClient {
   /************************************************************************
    *  Main Methods - taken from abstract class
    ***********************************************************************/
@@ -18,6 +18,11 @@ export class FirestoreClient implements AbstractDBClient {
 
   async setDoc(endpoint: IDBEndpoint, doc: DBDoc) {
     return db.doc(`${endpoint}/${doc._id}`).set(doc)
+  }
+
+  async updateDoc(endpoint: IDBEndpoint, doc: DBDoc) {
+    const { _id, ...updateValues } = doc
+    return db.doc(`${endpoint}/${_id}`).update(updateValues)
   }
 
   async setBulkDocs(endpoint: IDBEndpoint, docs: DBDoc[]) {
@@ -39,6 +44,7 @@ export class FirestoreClient implements AbstractDBClient {
     const data = await ref.get()
     return data.empty ? [] : data.docs.map((doc) => doc.data() as T)
   }
+
   deleteDoc(endpoint: IDBEndpoint, docId: string) {
     return db.collection(endpoint).doc(docId).delete()
   }

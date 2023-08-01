@@ -1,7 +1,7 @@
 // re-imports and re-exports
+import type { DBEndpoint } from '../stores/databaseV2/endpoints'
 import type { DBDoc as DBDocImport } from '../stores/databaseV2/types'
 export type DBDoc = DBDocImport
-import type { DBEndpoint } from '../stores/databaseV2/endpoints'
 export { DB_ENDPOINTS } from '../stores/databaseV2/endpoints'
 export type IDBEndpoint = DBEndpoint
 
@@ -14,21 +14,34 @@ export type ISODateString = string
 export type IModerationStatus =
   | 'draft'
   | 'awaiting-moderation'
+  | 'improvements-needed'
   | 'rejected'
   | 'accepted'
 
-export interface IModerable {
+export interface IModerationFeedback {
+  feedbackTimestamp: ISODateString
+  feedbackComments: string
+  adminUsername: string
+}
+export interface IModeration {
   moderation: IModerationStatus
+  moderationFeedback?: IModerationFeedback[]
+}
+export interface IModerable extends IModeration {
   _createdBy?: string
   _id?: string
 }
 
-/*****************************************************************
- *            Algolia Locations
- ****************************************************************/
-// algolia doesn't provide typings so taken from
-// https://community.algolia.com/places/documentation.html
-// implementation contains more fields but assumed not relevant
+export type UserMention = {
+  username: string
+  location: string
+}
+
+export type Collaborator = {
+  countryCode?: string | null
+  userName: string
+  isVerified: boolean
+}
 
 export interface ILocation {
   name: string
@@ -43,3 +56,19 @@ interface ILatLng {
   lat: number
   lng: number
 }
+
+export interface IVotedUseful {
+  votedUsefulBy?: string[]
+}
+export interface ISharedFeatures extends IVotedUseful {
+  total_views?: number
+  previousSlugs?: string[]
+}
+
+export type IVotedUsefulUpdate = {
+  _id: string
+} & IVotedUseful
+
+export type IModerationUpdate = {
+  _id: string
+} & IModeration

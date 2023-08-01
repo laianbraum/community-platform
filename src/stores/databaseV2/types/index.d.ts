@@ -4,7 +4,7 @@
  * API items.  On a detail page for a single item, the summary will be
  * shown followed by the remarks section (if any).
  */
-export type { AbstractDBClient } from './DBClient'
+export type { AbstractDatabaseClient } from './DBClient'
 
 /**
  * The `DBClients` consists of separate databases for use online and offline.
@@ -17,14 +17,14 @@ export type { AbstractDBClient } from './DBClient'
  * large collections in a more economical way than firestore
  */
 export interface DBClients {
-  cacheDB: AbstractDBClient
-  serverDB: AbstractDBClient
-  serverCacheDB: AbstractDBClient
+  cacheDB: AbstractDatabaseClient
+  serverDB: AbstractDatabaseClient
+  serverCacheDB: AbstractDatabaseClient
 }
 
 /**
  * @remarks
- * The `DBDoc` metadata is automatically popuplated to every document that
+ * The `DBDoc` metadata is automatically populated to every document that
  * goes into the database to allow for easier querying and management
  */
 export interface DBDoc {
@@ -32,6 +32,7 @@ export interface DBDoc {
   _created: ISODateString
   _modified: ISODateString
   _deleted: boolean
+  _contentModifiedTimestamp: ISODateString
 }
 
 export interface DBQueryOptions {
@@ -45,6 +46,7 @@ export interface DBQueryWhereOptions {
   operator: DBQueryWhereOperator
   value: DBQueryWhereValue
 }
+
 export type DBQueryWhereOperator = '>' | '<' | '==' | 'array-contains'
 export type DBQueryWhereValue = string | number
 

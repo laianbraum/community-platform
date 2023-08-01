@@ -1,89 +1,207 @@
 import { format } from 'date-fns'
-import * as React from 'react'
-import { Card, Flex, Heading, Text } from 'theme-ui'
-import { ModerationStatusText } from 'src/components/ModerationStatusText/ModerationStatustext'
-import type { IResearch } from 'src/models/research.models'
-import theme from 'src/themes/styled.theme'
-import { VerifiedUserBadge } from 'src/components/VerifiedUserBadge/VerifiedUserBadge'
+import { Icon, ModerationStatus, Username } from 'oa-components'
 import { Link } from 'react-router-dom'
+import { isUserVerified } from 'src/common/isUserVerified'
+import type { IResearch } from 'src/models/research.models'
+import { Card, Flex, Grid, Heading, Text, Box } from 'theme-ui'
 
 interface IProps {
-  item: IResearch.ItemDB
+  item: IResearch.ItemDB & {
+    votedUsefulCount: number
+  }
 }
 
-const ResearchListItem: React.FC<IProps> = ({ item }) => (
-  <Card data-cy="research=list-item" data-id={item._id} mb={3}>
-    <Flex sx={{ width: '100%', position: 'relative' }}>
-      <Link
-        to={`/research/${encodeURIComponent(item.slug)}`}
-        key={item._id}
-        style={{ width: '100%' }}
-      >
-        <Flex px={3} py={3} sx={{ flexDirection: ['column', 'column', 'row'] }}>
-          <Flex
-            sx={{
-              alignItems: 'center',
-              width: ['100%', '100%', `${(1 / 2) * 100}%`],
-            }}
+const ResearchListItem = ({ item }: IProps) => {
+  const collaborators = item['collaborators'] || []
+  const usefulDisplayCount =
+    item.votedUsefulCount > 0 ? item.votedUsefulCount : '0'
+
+  const _commonStatisticStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: [1, 2, 2],
+  }
+  return (
+    <Card data-cy="ResearchListItem" data-id={item._id} mb={3}>
+      <Flex sx={{ width: '100%', position: 'relative' }}>
+        <Link
+          to={`/research/${encodeURIComponent(item.slug)}`}
+          key={item._id}
+          style={{ width: '100%' }}
+        >
+          <Grid
+            px={3}
+            py={3}
+            columns={[1, '2fr minmax(274px, 1fr)']}
+            gap="60px"
           >
-            <Heading variant="small" color={'black'}>
-              {item.title}
-            </Heading>
-          </Flex>
-          <Flex sx={{ alignItems: 'center', width: ['100%', '100%', '25%'] }}>
-            <Text
-              my={2}
-              ml={1}
-              color={`${theme.colors.blue} !important`}
+            <Flex
               sx={{
-                ...theme.typography.auxiliary,
+                flexDirection: 'column',
+                alignItems: 'flex-start',
               }}
             >
-              {item._createdBy}
-            </Text>
-            <VerifiedUserBadge
-              userId={item._createdBy}
-              ml={1}
-              height="12px"
-              width="12px"
+              <Heading
+                color={'black'}
+                mb={2}
+                sx={{
+                  fontSize: [3, 3, 4],
+                }}
+              >
+                {item.title}
+              </Heading>
+              <Flex
+                sx={{
+                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Flex sx={{ alignItems: 'center' }}>
+                  <Username
+                    user={{
+                      userName: item._createdBy,
+                      countryCode: item.creatorCountry,
+                    }}
+                    isVerified={isUserVerified(item._createdBy)}
+                  />
+                  {Boolean(collaborators.length) && (
+                    <Text
+                      ml={4}
+                      sx={{
+                        display: ['none', 'block'],
+                        fontSize: 1,
+                        color: 'darkGrey',
+                        transform: 'translateY(2px)',
+                      }}
+                    >
+                      {collaborators.length +
+                        (collaborators.length === 1
+                          ? ' contributor'
+                          : ' contributors')}
+                    </Text>
+                  )}
+                  {/* Hide this on mobile, show on tablet & above. */}
+                  <Text
+                    ml={4}
+                    sx={{
+                      display: ['none', 'block'],
+                      fontSize: 1,
+                      color: 'darkGrey',
+                      transform: 'translateY(2px)',
+                    }}
+                  >
+                    {getItemDate(item, 'long')}
+                  </Text>
+                </Flex>
+                {/* Show these on mobile, hide on tablet & above. */}
+                <Box
+                  sx={{
+                    display: ['flex', 'none', 'none'],
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text color="black" ml={3} sx={_commonStatisticStyle}>
+                    {usefulDisplayCount}
+                    <Icon glyph="star-active" ml={1} />
+                  </Text>
+                  <Text color="black" ml={3} sx={_commonStatisticStyle}>
+                    {calculateTotalComments(item)}
+                    <Icon glyph="comment" ml={1} />
+                  </Text>
+                  <Text
+                    ml={3}
+                    sx={{
+                      display: ['block', 'none'],
+                      fontSize: 1,
+                      color: 'darkGrey',
+                    }}
+                  >
+                    {getItemDate(item, 'short')}
+                  </Text>
+                </Box>
+              </Flex>
+            </Flex>
+            {/* Hide these on mobile, show on tablet & above. */}
+            <Box
+              sx={{
+                display: ['none', 'flex', 'flex'],
+                alignItems: 'center',
+                justifyContent: 'space-around',
+              }}
+            >
+              <Text color="black" sx={_commonStatisticStyle}>
+                {usefulDisplayCount}
+                <Icon glyph="star-active" ml={1} />
+              </Text>
+              <Text color="black" sx={_commonStatisticStyle}>
+                {calculateTotalComments(item)}
+                <Icon glyph="comment" ml={1} />
+              </Text>
+              <Text
+                color="black"
+                sx={_commonStatisticStyle}
+                data-cy="ItemUpdateText"
+              >
+                {getUpdateText(item)}
+                <Icon glyph="update" ml={1} />
+              </Text>
+            </Box>
+          </Grid>
+          {item.moderation !== 'accepted' && (
+            <ModerationStatus
+              status={item.moderation}
+              contentType="research"
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+              }}
             />
-          </Flex>
-          <Flex
-            sx={{
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: ['100%', '100%', '25%'],
-            }}
-          >
-            <Text color="black">{getUpdateText(item)}</Text>
-            <Text
-              sx={{
-                alignSelf:
-                  item.moderation !== 'accepted' ? 'flex-start' : 'center',
-                ...theme.typography.auxiliary,
-              }}
-            >
-              {format(new Date(item._modified), 'DD-MM-YYYY')}
-            </Text>
-          </Flex>
-        </Flex>
-        {item.moderation !== 'accepted' && (
-          <ModerationStatusText
-            moderatedContent={item}
-            contentType="research"
-            bottom={['36px', '36px', 0]}
-            cropBottomRight
-          />
-        )}
-      </Link>
-    </Flex>
-  </Card>
-)
+          )}
+        </Link>
+      </Flex>
+    </Card>
+  )
+}
+
+const getItemDate = (item: IResearch.ItemDB, variant: string): string => {
+  const contentModifiedDate = format(
+    new Date(item._contentModifiedTimestamp || item._modified),
+    'DD-MM-YYYY',
+  )
+  const creationDate = format(new Date(item._created), 'DD-MM-YYYY')
+
+  if (contentModifiedDate !== creationDate) {
+    return variant === 'long'
+      ? `Updated ${contentModifiedDate}`
+      : contentModifiedDate
+  } else {
+    return variant === 'long' ? `Created ${creationDate}` : creationDate
+  }
+}
+
+const calculateTotalComments = (item: IResearch.ItemDB) => {
+  if (item.updates) {
+    const commentOnUpdates = item.updates.reduce((totalComments, update) => {
+      const updateCommentsLength = update.comments ? update.comments.length : 0
+      return totalComments + updateCommentsLength
+    }, 0)
+
+    return commentOnUpdates ? String(commentOnUpdates) : '0'
+  } else {
+    return '0'
+  }
+}
 
 const getUpdateText = (item: IResearch.ItemDB) => {
-  const count = item.updates?.length || 0
-  const text = count === 1 ? 'update' : 'updates'
-  return `${count} ${text}`
+  return item.updates?.length
+    ? String(
+        item.updates.filter(
+          (update) => update.status !== 'draft' && update._deleted !== true,
+        ).length,
+      )
+    : '0'
 }
 
 export default ResearchListItem

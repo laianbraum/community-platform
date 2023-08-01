@@ -8,8 +8,8 @@ import { toJS } from 'mobx'
 import { HowtoForm } from 'src/pages/Howto/Content/Common/Howto.form'
 import { Text } from 'theme-ui'
 import type { IUser } from 'src/models/user.models'
-import { isAllowToEditContent } from 'src/utils/helpers'
-import { Loader } from 'src/components/Loader'
+import { isAllowedToEditContent } from 'src/utils/helpers'
+import { Loader } from 'oa-components'
 import { logger } from 'src/logger'
 
 interface IState {
@@ -40,7 +40,7 @@ class EditHowto extends React.Component<IProps, IState> {
   /* eslint-disable @typescript-eslint/naming-convention */
   public async UNSAFE_componentWillMount() {
     const loggedInUser = this.injected.howtoStore.activeUser
-    if (this.injected.howtoStore.activeHowto! !== undefined) {
+    if (this.injected.howtoStore.activeHowto) {
       this.setState({
         formValues: toJS(this.injected.howtoStore.activeHowto) as IHowtoDB,
         isLoading: false,
@@ -68,7 +68,7 @@ class EditHowto extends React.Component<IProps, IState> {
     logger.debug('edit', this.state)
     const { formValues, isLoading, loggedInUser } = this.state
     if (formValues && !isLoading) {
-      if (loggedInUser && isAllowToEditContent(formValues, loggedInUser)) {
+      if (loggedInUser && isAllowedToEditContent(formValues, loggedInUser)) {
         return (
           <HowtoForm
             formValues={formValues}

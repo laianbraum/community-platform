@@ -9,11 +9,10 @@ describe('[Common]', () => {
   it('[Not-Found Page]', () => {
     const unknownUrl = '/abcdefghijklm'
     cy.visit(unknownUrl)
-    cy.contains('404').should('be.exist')
-    cy.contains(
-      `The page you were looking for was moved or doesn't exist`,
-    ).should('be.exist')
-    cy.get('a').contains('Home').should('have.attr', 'href').and('eq', '/')
+    cy.get('[data-test="NotFound: Heading"]')
+      .contains(`Nada, page not found 💩`)
+      .should('be.exist')
+    cy.get('a').contains('home page').should('have.attr', 'href').and('eq', '/')
   })
 
   it('[Page Navigation]', () => {
@@ -25,11 +24,6 @@ describe('[Common]', () => {
     //     'eq',
     //     'https://docs.google.com/forms/d/e/1FAIpQLSd3nevXb6iewap1lkFPWQxyerLsndcRkocv4QXIL3iLIyzazA/viewform?usp=pp_url&entry.1856170488=',
     //   )
-
-    cy.step('Go to Events page')
-    cy.get('[data-cy=page-link]').contains('Events').click()
-    cy.url().should('include', '/events')
-    // cy.get('[data-cy=feedback] > button').should('be.visible')
 
     cy.step('Go to Map page')
     cy.get('[data-cy=page-link]').contains('Map').click()
@@ -75,11 +69,11 @@ describe('[Common]', () => {
       cy.url().should('include', `/u/${username}`)
 
       cy.step('Go to Settings')
-      cy.clickMenuItem(UserMenuItem.Settings)
+      cy.get(`[data-cy=menu-${UserMenuItem.Settings}]`).click()
       cy.url().should('include', 'settings')
 
       cy.step('Logout the session')
-      cy.clickMenuItem(UserMenuItem.LogOut)
+      cy.get(`[data-cy=menu-${UserMenuItem.LogOut}]`).click()
       cy.get('[data-cy=login]').should('be.visible')
       cy.get('[data-cy=join]').should('be.visible')
     })

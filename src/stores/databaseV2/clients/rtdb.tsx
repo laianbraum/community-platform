@@ -1,10 +1,10 @@
 import type { IDBEndpoint, DBDoc } from 'src/models/common.models'
 import { rtdb } from 'src/utils/firebase'
-import type { AbstractDBClient } from '../types'
+import type { AbstractDatabaseClient } from '../types'
 
 const db = rtdb
 
-export class RealtimeDBClient implements AbstractDBClient {
+export class RealtimeDBClient implements AbstractDatabaseClient {
   /************************************************************************
    *  Main Methods - taken from abstract class
    ***********************************************************************/
@@ -15,6 +15,11 @@ export class RealtimeDBClient implements AbstractDBClient {
 
   async setDoc(endpoint: IDBEndpoint, doc: DBDoc) {
     return db.ref(`${endpoint}/${doc._id}`).set(doc)
+  }
+
+  async updateDoc(endpoint: IDBEndpoint, doc: DBDoc) {
+    const { _id, ...updateValues } = doc
+    return db.ref(`${endpoint}/${_id}`).update(updateValues)
   }
 
   async setBulkDocs(endpoint: IDBEndpoint, docs: DBDoc[]) {
@@ -40,6 +45,7 @@ export class RealtimeDBClient implements AbstractDBClient {
     // eslint-disable-next-line
     return []
   }
+
   deleteDoc(endpoint: IDBEndpoint, docId: string) {
     return db.ref(`${endpoint}/${docId}`).remove()
   }

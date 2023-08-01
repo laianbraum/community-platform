@@ -6,32 +6,27 @@ import { AuthRoute } from '../common/AuthRoute'
 import type { HowtoStore } from 'src/stores/Howto/howto.store'
 import { HowtoList } from './Content/HowtoList/HowtoList'
 import { Howto } from './Content/Howto/Howto'
-import type { AggregationsStore } from 'src/stores/Aggregations/aggregations.store'
 // lazy load editor pages
-const CreateHowto = lazy(() => import('./Content/CreateHowto/CreateHowto'))
-const EditHowto = lazy(() => import('./Content/EditHowto/EditHowto'))
+const CreateHowto = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "CreateHowto" */ './Content/CreateHowto/CreateHowto'
+    ),
+)
+const EditHowto = lazy(
+  () =>
+    import(/* webpackChunkName: "EditHowto" */ './Content/EditHowto/EditHowto'),
+)
 
 interface IProps extends RouteComponentProps {
   howtoStore?: HowtoStore
-  aggregationsStore?: AggregationsStore
 }
 
-@inject('howtoStore', 'aggregationsStore')
+@inject('howtoStore')
 class HowtoPage extends React.Component<IProps, any> {
   constructor(props: any) {
     super(props)
     this.props.howtoStore!.init()
-  }
-
-  componentDidMount() {
-    // Ensure aggregations up-to-date when using any child pages
-    this.props.aggregationsStore!.updateAggregation('users_votedUsefulHowtos')
-  }
-  componentWillUnmount() {
-    // Stop receiving updates when navigating away from child pages
-    this.props.aggregationsStore!.stopAggregationUpdates(
-      'users_votedUsefulHowtos',
-    )
   }
 
   public render() {

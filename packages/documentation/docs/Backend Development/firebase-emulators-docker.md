@@ -1,4 +1,7 @@
-# Firebase Emulators
+---
+id: firebase-emulators-docker
+title: Firestore Emulators
+---
 
 In order to test backend functions locally, firebase provides a suite of emulators to mimic most functionality seen online (e.g firestore, storage, functions, triggers etc.)
 
@@ -34,7 +37,7 @@ This will start the following:
 
 ## Emulator Dashboard
 
-The emulator should start at http://localhost:4001. Follow the link to see an overview of the available services
+The emulator should start at [http://localhost:4001](http://localhost:4001). Follow the link to see an overview of the available services
 
 ![Dashboard](./images/firebase-emulators-dashboard.png)
 
@@ -95,6 +98,8 @@ http://localhost:4002/community-platform-emulated/us-central1/emulator/seed-user
 
 ![](images/emulators-docker-http-req.png)
 
+Read more about [Connecting your app the Cloud Functions Emulator](https://firebase.google.com/docs/emulator-suite/connect_functions).
+
 ### Accessing Logs
 
 If the emulator throws an error you may want to check generated debug.log files. These will exist in the container in the root `/app` folder.
@@ -132,15 +137,15 @@ A custom image can be built and run by passing custom repo or tag args to the bu
 yarn workspace oa-emulators-docker build --repo=my_custom_repo --tag=my_custom_tag
 ```
 
-If just intending to test locally a blank `--repo=` can be provided to avoid trying to pull an image from dockerhub
-
-That specific image can then either be uploaded to dockerhub (assuming the repo name provided matches a personal repo configured locally) and/or run directly with the start command
+If just intending to test locally a blank `--repo=` can be provided to avoid trying to pull an image from dockerhub and run locally
 
 ```
-yarn workspace oa-emulators-docker start --repo=my_custom_repo --tag=my_custom_tag
+yarn workspace oa-emulators-docker build --repo=
 ```
 
-Note - this will only start the emulators, to run the frontend you will also need to run the rest of the scripts found in the src package.json `start:emulated:docker` script separately as required
+```
+yarn start:emulated:docker:local
+```
 
 ## Troubleshooting
 

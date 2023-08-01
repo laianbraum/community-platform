@@ -1,6 +1,6 @@
-import type { ISODateString, IModerable } from './common.models'
-import type { WorkspaceType } from './user_pp.models'
-import type { ProfileTypeLabel } from '../modules/profile'
+import type { IModerationStatus } from './common.models'
+import type { WorkspaceType } from './userPreciousPlastic.models'
+import type { ProfileTypeLabel } from '../modules/profile/types'
 
 /**
  * Map pins keep minimal information required for pin display.
@@ -17,7 +17,9 @@ export type IMapPinSubtype = WorkspaceType
  * Map pins have a `type` which correspond to icon
  * They can also optionally have a subtype for additional filtering
  */
-export interface IMapPin extends IModerable {
+export interface IMapPin {
+  moderation: IModerationStatus
+  _createdBy?: string
   _id: string
   _deleted: boolean
   type: IMapPinType
@@ -38,11 +40,11 @@ export interface IMapPinDetail {
   name: string
   displayName: string
   shortDescription: string
-  lastActive: ISODateString
   profilePicUrl: string
   profileUrl: string
   heroImageUrl: string
   verifiedBadge: boolean
+  country: string | null
 }
 
 export interface ILatLng {

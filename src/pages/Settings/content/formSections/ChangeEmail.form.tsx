@@ -2,9 +2,8 @@ import * as React from 'react'
 import { Field, Form } from 'react-final-form'
 import { Button, FieldInput } from 'oa-components'
 import type { UserStore } from 'src/stores/User/user.store'
-import { Text, Flex } from 'theme-ui'
-import theme from 'src/themes/styled.theme'
-import styled from '@emotion/styled'
+import { Text, Flex, Label } from 'theme-ui'
+import { PasswordField } from 'src/common/Form/PasswordField'
 
 interface IFormValues {
   password?: string
@@ -20,12 +19,6 @@ interface IState {
 interface IProps {
   userStore: UserStore
 }
-
-const Label = styled.label`
-  font-size: ${theme.fontSizes[2] + 'px'};
-  margin-bottom: ${theme.space[2] + 'px'};
-  display: block;
-`
 
 export class ChangeEmailForm extends React.Component<IProps, IState> {
   constructor(props: IProps) {
@@ -58,10 +51,12 @@ export class ChangeEmailForm extends React.Component<IProps, IState> {
   }
 
   public render() {
+    const _labelStyle = { fontSize: 2, mb: 2 }
     return (
       <>
         <Button
           my={3}
+          mr={2}
           variant={'secondary'}
           onClick={() =>
             this.setState({
@@ -88,7 +83,9 @@ export class ChangeEmailForm extends React.Component<IProps, IState> {
                     <Text>Current email address: {this.state.email}</Text>
                   </Flex>
                   <Flex sx={{ flexDirection: 'column' }} mb={3}>
-                    <Label htmlFor="newEmail">New email address :</Label>
+                    <Label htmlFor="newEmail" sx={_labelStyle}>
+                      New email address :
+                    </Label>
                     <Field
                       name="newEmail"
                       component={FieldInput}
@@ -99,11 +96,12 @@ export class ChangeEmailForm extends React.Component<IProps, IState> {
                     />
                   </Flex>
                   <Flex sx={{ flexDirection: 'column' }} mb={3}>
-                    <Label htmlFor="oldPassword">Password :</Label>
-                    <Field
+                    <Label htmlFor="oldPassword" sx={_labelStyle}>
+                      Password :
+                    </Label>
+                    <PasswordField
                       name="password"
                       component={FieldInput}
-                      placeholder="password"
                       type="password"
                       autocomplete="off"
                       required

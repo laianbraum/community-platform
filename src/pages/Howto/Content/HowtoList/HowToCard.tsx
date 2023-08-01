@@ -1,31 +1,33 @@
+import { CategoryTag, Icon, ModerationStatus, Username } from 'oa-components'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
-import { Text, Card, Flex, Heading } from 'theme-ui'
 import { Link as RouterLink } from 'react-router-dom'
-import ModerationStatusText from 'src/components/ModerationStatusText/ModerationStatustext'
-import { FlagIconHowTos, Icon } from 'oa-components'
-import TagDisplay from 'src/components/Tags/TagDisplay/TagDisplay'
+import { isUserVerified } from 'src/common/isUserVerified'
 import type { IHowtoDB } from 'src/models/howto.models'
 import { capitalizeFirstLetter } from 'src/utils/helpers'
-import { VerifiedUserBadge } from 'src/components/VerifiedUserBadge/VerifiedUserBadge'
-import { useTheme } from '@emotion/react'
+import { Card, Flex, Heading, Text, Box } from 'theme-ui'
 
 interface IProps {
-  howto: IHowtoDB
+  howto: IHowtoDB & { taglist: any }
   votedUsefulCount: number
 }
 
 export const HowToCard = (props: IProps) => {
   const { howto, votedUsefulCount } = props
-  const theme = useTheme()
   return (
-    <Card data-cy="card" sx={{ borderRadius: 2, position: 'relative' }}>
-      <Flex>
+    <Card
+      data-cy="card"
+      data-cy-howto-slug={howto.slug}
+      sx={{ borderRadius: 2, position: 'relative', height: '100%' }}
+    >
+      <Box>
         {howto.moderation !== 'accepted' && (
-          <ModerationStatusText
-            moderatedContent={howto}
-            contentType="howto"
-            top={'62%'}
-          />
+          <>
+            <ModerationStatus
+              status={howto.moderation}
+              contentType="howto"
+              sx={{ top: '62%', position: 'absolute', right: 0 }}
+            />
+          </>
         )}
         <RouterLink
           key={howto._id}
@@ -45,50 +47,55 @@ export const HowToCard = (props: IProps) => {
                 objectFit: 'cover',
               }}
               threshold={500}
-              src={howto.cover_image.downloadUrl}
+              src={howto.cover_image?.downloadUrl}
               crossOrigin=""
             />
           </Flex>
-          <Flex sx={{ flexDirection: 'column', padding: 3 }}>
+        </RouterLink>
+
+        <Flex sx={{ flexDirection: 'column', padding: 3, paddingBottom: 2 }}>
+          <Flex
+            sx={{
+              flexDirection: 'column',
+              height: 'calc(((350px) / 3) * 0.5)',
+            }}
+          >
             <Heading variant="small" color={'black'}>
               {/* HACK 2021-07-16 - new howtos auto capitalize title but not older */}
-              {capitalizeFirstLetter(howto.title)}
+              <RouterLink
+                key={howto._id}
+                to={`/how-to/${encodeURIComponent(howto.slug)}`}
+                style={{ width: '100%', color: 'black' }}
+              >
+                {capitalizeFirstLetter(howto.title)}
+              </RouterLink>
             </Heading>
             <Flex sx={{ alignItems: 'center' }}>
-              {howto.creatorCountry && (
-                <FlagIconHowTos code={howto.creatorCountry} />
-              )}
-              <Text
-                my={2}
-                ml={1}
-                sx={{ display: 'flex', ...theme.typography.auxiliary }}
-              >
-                By {howto._createdBy}
-              </Text>
-              <VerifiedUserBadge
-                userId={howto._createdBy}
-                ml={1}
-                height="12px"
-                width="12px"
+              <Username
+                user={{
+                  userName: howto._createdBy,
+                  countryCode: howto.creatorCountry,
+                }}
+                isVerified={isUserVerified(howto._createdBy)}
               />
             </Flex>
-            <Flex mt={4}>
-              <Flex sx={{ flex: 1, flexWrap: 'wrap' }}>
-                {howto.tags &&
-                  Object.keys(howto.tags).map((tag) => {
-                    return <TagDisplay key={tag} tagKey={tag} />
-                  })}
-              </Flex>
-              {votedUsefulCount > 0 && (
-                <Flex ml={1} sx={{ alignItems: 'center' }}>
-                  <Icon glyph="star-active" marginRight="4px" />
-                  <Text color="black">{votedUsefulCount}</Text>
-                </Flex>
-              )}
-            </Flex>
           </Flex>
-        </RouterLink>
-      </Flex>
+          <Flex mt={5}>
+            <Flex sx={{ flex: 1, flexWrap: 'wrap' }}>
+              {howto.taglist &&
+                howto.taglist.map((tag, idx) => (
+                  <CategoryTag key={idx} tag={tag} sx={{ mr: 1 }} />
+                ))}
+            </Flex>
+            {votedUsefulCount > 0 && (
+              <Flex ml={1} sx={{ alignItems: 'center' }}>
+                <Icon glyph="star-active" marginRight="4px" />
+                <Text color="black">{votedUsefulCount}</Text>
+              </Flex>
+            )}
+          </Flex>
+        </Flex>
+      </Box>
     </Card>
   )
 }

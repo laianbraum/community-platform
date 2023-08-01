@@ -1,15 +1,25 @@
 import { PureComponent } from 'react'
 import { Field } from 'react-final-form'
-import { Heading, Card, Flex, Text } from 'theme-ui'
-import { ImageInputField } from 'src/components/Form/ImageInput.field'
+import { Heading, Card, Flex, Text, Label } from 'theme-ui'
+import { ImageInputField } from 'src/common/Form/ImageInput.field'
 import { Button, FieldInput, FieldTextarea, Modal } from 'oa-components'
 import styled from '@emotion/styled'
-import theme from 'src/themes/styled.theme'
 import type { IHowtoStep } from 'src/models/howto.models'
 import type { IUploadedFileMeta } from 'src/stores/storage'
-import { required } from 'src/utils/validators'
+import {
+  draftValidationWrapper,
+  required,
+  minValue,
+  composeValidators,
+} from 'src/utils/validators'
 import { COMPARISONS } from 'src/utils/comparisons'
-import { HOWTO_MAX_LENGTH, HOWTO_TITLE_MAX_LENGTH } from '../../constants'
+import {
+  HOWTO_STEP_DESCRIPTION_MIN_LENGTH,
+  HOWTO_STEP_DESCRIPTION_MAX_LENGTH,
+  HOWTO_MIN_REQUIRED_STEPS,
+  HOWTO_TITLE_MAX_LENGTH,
+  HOWTO_TITLE_MIN_LENGTH,
+} from '../../constants'
 
 const ImageInputFieldWrapper = styled.div`
   width: 150px;
@@ -28,11 +38,12 @@ interface IState {
   showDeleteModal: boolean
   _toDocsList: boolean
 }
+// font-size: ${theme.fontSizes[2] + 'px'};
 
-const Label = styled.label`
-  font-size: ${theme.fontSizes[2] + 'px'};
-  margin-bottom: ${theme.space[2] + 'px'};
-`
+// const Label = styled.label`
+//   font-size: ${theme.fontSizes[2] + 'px'};
+//   margin-bottom: ${theme.space[2] + 'px'};
+// `
 
 class HowtoStep extends PureComponent<IProps, IState> {
   constructor(props: IProps) {
@@ -66,8 +77,22 @@ class HowtoStep extends PureComponent<IProps, IState> {
     return images[0] ? null : 'Include either images or a video'
   }
 
+  /**
+   * Ensure that the How to description meets the following criteria:
+   * - required
+   * - minimum character length of 100 characters
+   * - maximum character length of 1000 characters
+   *
+   * @param value - How to step description field value
+   */
   render() {
     const { step, index } = this.props
+    const _labelStyle = {
+      fontSize: 2,
+      marginBottom: 2,
+    }
+
+    const isAboveMinimumStep = index >= HOWTO_MIN_REQUIRED_STEPS
 
     return (
       // NOTE - animation parent container in CreateHowTo
@@ -75,13 +100,14 @@ class HowtoStep extends PureComponent<IProps, IState> {
         <Flex p={3} sx={{ flexDirection: 'column' }}>
           <Flex p={0}>
             <Heading variant="small" sx={{ flex: 1 }} mb={3}>
-              Step {index + 1}
+              Step {index + 1} {!isAboveMinimumStep && '*'}
             </Heading>
             {index >= 1 && (
               <Button
                 data-cy="move-step"
                 variant={'secondary'}
                 icon="arrow-full-up"
+                showIconOnly={true}
                 sx={{ mx: '5px' }}
                 onClick={() => this.props.moveStep(index, index - 1)}
               />
@@ -91,12 +117,14 @@ class HowtoStep extends PureComponent<IProps, IState> {
               variant={'secondary'}
               icon="arrow-full-down"
               sx={{ mx: '5px' }}
+              showIconOnly={true}
               onClick={() => this.props.moveStep(index, index + 1)}
             />
-            {index >= 1 && (
+            {isAboveMinimumStep && (
               <Button
                 data-cy="delete-step"
-                variant={'tertiary'}
+                variant={'outline'}
+                showIconOnly={true}
                 icon="delete"
                 onClick={() => this.toggleDeleteModal()}
               />
@@ -119,7 +147,7 @@ class HowtoStep extends PureComponent<IProps, IState> {
                 <Flex px={1}>
                   <Button
                     data-cy="confirm"
-                    variant={'tertiary'}
+                    variant={'outline'}
                     onClick={() => this.confirmDelete()}
                   >
                     Delete
@@ -130,7 +158,9 @@ class HowtoStep extends PureComponent<IProps, IState> {
           </Flex>
 
           <Flex sx={{ flexDirection: 'column' }} mb={3}>
-            <Label htmlFor={`${step}.title`}>Title of this step *</Label>
+            <Label sx={_labelStyle} htmlFor={`${step}.title`}>
+              Title of this step *
+            </Label>
             <Field
               name={`${step}.title`}
               data-cy="step-title"
@@ -138,27 +168,49 @@ class HowtoStep extends PureComponent<IProps, IState> {
               component={FieldInput}
               placeholder={`Title of this step (max ${HOWTO_TITLE_MAX_LENGTH} characters)`}
               maxLength={HOWTO_TITLE_MAX_LENGTH}
-              validate={required}
+              minLength={HOWTO_TITLE_MIN_LENGTH}
+              validate={(value, allValues) =>
+                draftValidationWrapper(
+                  value,
+                  allValues,
+                  composeValidators(required, minValue(HOWTO_TITLE_MIN_LENGTH)),
+                )
+              }
               validateFields={[]}
               isEqual={COMPARISONS.textInput}
+              showCharacterCount
             />
           </Flex>
           <Flex sx={{ flexDirection: 'column' }} mb={3}>
-            <Label htmlFor={`${step}.text`}>Description of this step *</Label>
+            <Label sx={_labelStyle} htmlFor={`${step}.text`}>
+              Description of this step *
+            </Label>
             <Field
               name={`${step}.text`}
-              placeholder="Explain what you are doing in this step. If it gets too long, consider breaking it into multiple steps (max 700 characters)"
-              maxLength={HOWTO_MAX_LENGTH}
+              placeholder={`Explain what you are doing in this step. If it gets too long, consider breaking it into multiple steps (${HOWTO_STEP_DESCRIPTION_MIN_LENGTH}-${HOWTO_STEP_DESCRIPTION_MAX_LENGTH} characters)`}
+              minLength={HOWTO_STEP_DESCRIPTION_MIN_LENGTH}
+              maxLength={HOWTO_STEP_DESCRIPTION_MAX_LENGTH}
               data-cy="step-description"
+              data-testid="step-description"
               modifiers={{ capitalize: true }}
               component={FieldTextarea}
               style={{ resize: 'vertical', height: '300px' }}
-              validate={required}
+              validate={(value, allValues) =>
+                draftValidationWrapper(
+                  value,
+                  allValues,
+                  composeValidators(
+                    required,
+                    minValue(HOWTO_STEP_DESCRIPTION_MIN_LENGTH),
+                  ),
+                )
+              }
               validateFields={[]}
               isEqual={COMPARISONS.textInput}
+              showCharacterCount
             />
           </Flex>
-          <Label htmlFor={`${step}.text`}>
+          <Label sx={_labelStyle} htmlFor={`${step}.text`}>
             Upload image(s) for this step *
           </Label>
           <Flex
@@ -191,7 +243,7 @@ class HowtoStep extends PureComponent<IProps, IState> {
             </ImageInputFieldWrapper>
           </Flex>
           <Flex sx={{ flexDirection: 'column' }} mb={3}>
-            <Label htmlFor={`${step}.videoUrl`}>
+            <Label sx={_labelStyle} htmlFor={`${step}.videoUrl`}>
               Or embed a YouTube video*
             </Label>
             <Field
@@ -199,7 +251,13 @@ class HowtoStep extends PureComponent<IProps, IState> {
               data-cy="step-videoUrl"
               component={FieldInput}
               placeholder="https://youtube.com/watch?v="
-              validate={(url) => this.validateMedia(url)}
+              validate={(value, allValues) =>
+                draftValidationWrapper(
+                  value,
+                  allValues,
+                  this.validateMedia.bind(this),
+                )
+              }
               validateFields={[]}
               isEqual={COMPARISONS.textInput}
             />

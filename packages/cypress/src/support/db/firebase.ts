@@ -5,8 +5,8 @@ import 'firebase/firestore'
 import 'firebase/storage'
 import 'firebase/functions'
 import 'firebase/database'
-import { SEED_DATA } from '../../fixtures/seed'
-import { DB_ENDPOINTS } from './endpoints'
+import { MOCK_DATA } from '../../data/index'
+import { DB_ENDPOINTS } from 'oa-shared/models'
 
 const fbConfig = {
   apiKey: 'AIzaSyDAxS_7M780mI3_tlwnAvpbaqRsQPlmp64',
@@ -23,10 +23,10 @@ const db = firebase.firestore()
 class FirestoreTestDB {
   seedDB = async () => {
     const endpoints = ensureDBPrefixes(DB_ENDPOINTS)
-    const dbWrites = Object.keys(SEED_DATA).map(async (key) => {
+    const dbWrites = Object.keys(MOCK_DATA).map(async (key) => {
       const endpoint = endpoints[key]
-      await this.addDocuments(endpoint, SEED_DATA[key])
-      return [endpoint, SEED_DATA[key]]
+      await this.addDocuments(endpoint, Object.values(MOCK_DATA[key]))
+      return [endpoint, MOCK_DATA[key]]
     })
     return Promise.all(dbWrites)
   }
@@ -94,7 +94,8 @@ function ensureDBPrefixes(endpoints: { [key: string]: string }) {
   const prefix = Cypress.env('DB_PREFIX')
   Object.entries(endpoints).forEach(([key, value]) => {
     if (!value.startsWith(prefix)) {
-      endpoints[key] = `${prefix}${value}`
+      // The regex here is intended to remove collectionPrefix
+      endpoints[key] = `${prefix}${value.replace(/^[A-Za-z0-9]{5}_/, '')}`
     }
   })
   return endpoints

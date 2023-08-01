@@ -1,12 +1,33 @@
 import { Suspense, lazy } from 'react'
 import { AuthRoute } from '../common/AuthRoute'
 import { Route, Switch, withRouter } from 'react-router-dom'
-const CreateResearch = lazy(() => import('./Content/CreateResearch'))
-const CreateUpdate = lazy(() => import('./Content/CreateUpdate'))
-const ResearchItemEditor = lazy(() => import('./Content/EditResearch'))
-const UpdateItemEditor = lazy(() => import('./Content/EditUpdate'))
-const ResearchArticle = lazy(() => import('./Content/ResearchArticle'))
-const ResearchList = lazy(() => import('./Content/ResearchList'))
+import { RESEARCH_EDITOR_ROLES } from './constants'
+const CreateResearch = lazy(
+  () =>
+    import(/* webpackChunkName: "CreateResearch" */ './Content/CreateResearch'),
+)
+const CreateUpdate = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "CreateResearchUpdate" */ './Content/CreateUpdate'
+    ),
+)
+const ResearchItemEditor = lazy(
+  () => import(/* webpackChunkName: "EditResearch" */ './Content/EditResearch'),
+)
+const UpdateItemEditor = lazy(
+  () =>
+    import(/* webpackChunkName: "EditResearchUpdate" */ './Content/EditUpdate'),
+)
+const ResearchArticle = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "ResearchArticle" */ './Content/ResearchArticle'
+    ),
+)
+const ResearchList = lazy(
+  () => import(/* webpackChunkName: "ResearchList" */ './Content/ResearchList'),
+)
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max)
@@ -19,29 +40,29 @@ const routes = () => (
       <AuthRoute
         path="/research/create"
         component={CreateResearch}
-        roleRequired="beta-tester"
+        roleRequired={RESEARCH_EDITOR_ROLES}
       />
       <AuthRoute
         exact
         path="/research/:slug/new-update"
         component={CreateUpdate}
-        roleRequired="beta-tester"
+        roleRequired={RESEARCH_EDITOR_ROLES}
       />
       <AuthRoute
         exact
         path="/research/:slug/edit"
         component={ResearchItemEditor}
-        roleRequired="beta-tester"
+        roleRequired={RESEARCH_EDITOR_ROLES}
       />
       <AuthRoute
         exact
         path="/research/:slug/edit-update/:update"
         component={UpdateItemEditor}
-        roleRequired="beta-tester"
+        roleRequired={RESEARCH_EDITOR_ROLES}
       />
       <Route
-        path="/research/:slug"
         exact
+        path="/research/:slug"
         key={getRandomInt(55555)}
         component={ResearchArticle}
       />
@@ -49,4 +70,4 @@ const routes = () => (
   </Suspense>
 )
 
-export default withRouter(routes)
+export default withRouter(routes) as React.ComponentType

@@ -47,25 +47,6 @@ export const notifyHowToAccepted = functions.firestore
       .catch(handleErr)
   })
 
-export const notifyEventAccepted = functions.firestore
-  .document('v3_events/{id}')
-  .onUpdate(async (change, context) => {
-    const info = change.after.exists ? change.after.data() : null
-    if (info === null || info.moderation !== 'accepted') {
-      return null
-    }
-    const user = info._createdBy
-    const url = info.url
-    const location = info.location.country
-    await axios
-      .post(DISCORD_WEBHOOK_URL, {
-        content: `📅 Jeej new event in **${location}** by *${user}* posted here:
-            <${url}>`,
-      })
-      .then(handleResponse, handleErr)
-      .catch(handleErr)
-  })
-
 const handleResponse = (res: AxiosResponse) => {
   console.log('post success')
   return res

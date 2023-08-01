@@ -3,17 +3,15 @@ import type {
   IMAchineBuilderXp,
   IOpeningHours,
   PlasticTypeLabel,
-} from 'src/models/user_pp.models'
+} from 'src/models/userPreciousPlastic.models'
 
-import { Heading, Box, Image, Flex, Text } from 'theme-ui'
+import { Box, Container, Flex, Heading, Image, Paragraph } from 'theme-ui'
 // import slick and styles
 import Slider from 'react-slick'
 import 'src/assets/css/slick.min.css'
-import styled from '@emotion/styled'
 
-import { MemberBadge, Icon, FlagIcon } from 'oa-components'
-
-import theme from 'src/themes/styled.theme'
+import { MemberBadge, Icon, Username, UserStatistics } from 'oa-components'
+import UserCreatedDocuments from './UserCreatedDocuments'
 
 // Plastic types
 import HDPEIcon from 'src/assets/images/plastic-types/hdpe.svg'
@@ -29,10 +27,11 @@ import PVCIcon from 'src/assets/images/plastic-types/pvc.svg'
 import type { IUploadedFileMeta } from 'src/stores/storage'
 import type { IConvertedFileMeta } from 'src/types'
 
-import { UserStats } from './UserStats'
 import UserContactAndLinks from './UserContactAndLinks'
 import { UserAdmin } from './UserAdmin'
-import { ProfileType } from 'src/modules/profile'
+import { ProfileType } from 'src/modules/profile/types'
+import { userStats } from 'src/common/hooks/userStats'
+import type { UserCreatedDocs } from '.'
 
 interface IBackgroundImageProps {
   bgImg: string
@@ -40,89 +39,38 @@ interface IBackgroundImageProps {
 
 interface IProps {
   user: IUserPP
+  docs: UserCreatedDocs | undefined
 }
 
-const MobileBadge = styled.div`
-  position: relative;
-  max-width: 120px;
-  margin-bottom: 20px;
+const SliderImage = (props: IBackgroundImageProps) => (
+  <Box
+    sx={{
+      backgroundImage: `url(${props.bgImg})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      height: ['300px', '300px', '300px', '500px'],
+      width: '100%',
+    }}
+    {...props}
+  ></Box>
+)
 
-  @media only screen and (min-width: ${theme.breakpoints[2]}) {
-    max-width: 150px;
-    margin-top: -50%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-`
-
-const ProfileWrapper = styled(Box)`
-  /* margin-top: 40px;
-  margin-bottom: 40px; */
-  border: 2px solid black;
-  border-radius: 10px;
-  overflow: hidden;
-  max-width: 1000px;
-  width: 100%;
-  align-self: center;
-`
-
-const ProfileWrapperCarousel = styled.div``
-
-const OpeningHours = styled.p`
-  color: ${theme.colors.grey};
-  margin-bottom: 5px;
-  margin-top: 5px;
-`
-
-const PlasticType = styled.div`
-  width: 50px;
-  margin-right: 15px;
-
-  &:last-child {
-    margin-right: 0;
-  }
-`
-
-const ProfileContentWrapper = styled(Flex)`
-  background-color: ${theme.colors.white};
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  /* margin-top: -112px;
-
-  @media only screen and (min-width: ${theme.breakpoints[1]}) {
-      margin-top: 0;
-  } */
-`
-
-const SliderImage = styled.div`
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  /* padding-bottom: 52%; */
-  min-height: 300px;
-  height: 300px;
-
-  ${(props: IBackgroundImageProps) =>
-    props.bgImg &&
-    `
-    background-image: url(${props.bgImg});
-  `}
-
-  @media only screen and (min-width: ${(props) => props.theme.breakpoints[2]}) {
-    height: 500px;
-  }
-`
-
-const MachineExperienceTab = styled.div`
-  display: inline-block;
-  padding: 10px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: ${theme.colors.background};
-  border-radius: 5px;
-  background-color: ${theme.colors.background};
-  margin-right: 10px;
-`
+const MobileBadge = ({ children }) => (
+  <Flex
+    sx={{
+      alignItems: ['left', 'left', 'center'],
+      flexDirection: 'column',
+      marginBottom: 0,
+      marginLeft: [0, 0, 'auto'],
+      marginRight: [0, 0, 'auto'],
+      marginTop: [0, 0, '-50%'],
+      position: 'relative',
+    }}
+  >
+    {children}
+  </Flex>
+)
 
 const sliderSettings = {
   dots: false,
@@ -131,27 +79,17 @@ const sliderSettings = {
   slidesToScroll: 1,
   adaptiveHeight: false,
   nextArrow: (
-    <Icon
-      glyph="chevron-right"
-      color={theme.colors.white}
-      size={60}
-      marginRight="4px"
-    />
+    <Icon glyph="chevron-right" color="white" size={60} marginRight="4px" />
   ),
   prevArrow: (
-    <Icon
-      glyph="chevron-left"
-      color={theme.colors.white}
-      size={60}
-      marginRight="4px"
-    />
+    <Icon glyph="chevron-left" color="white" size={60} marginRight="4px" />
   ),
 }
 
 // Comment on 6.05.20 by BG : renderCommitmentBox commented for now, will be reused with #974
 
-function renderPlasticTypes(plasticTypes: Array<PlasticTypeLabel>) {
-  function renderIcon(type: string) {
+const renderPlasticTypes = (plasticTypes: Array<PlasticTypeLabel>) => {
+  const renderIcon = (type: string) => {
     switch (type) {
       case 'hdpe':
         return <Image loading="lazy" src={HDPEIcon} />
@@ -175,12 +113,22 @@ function renderPlasticTypes(plasticTypes: Array<PlasticTypeLabel>) {
   return (
     <div>
       <h4>We collect the following plastic types:</h4>
-      <Flex sx={{ flexWrap: 'wrap' }}>
+      <Flex
+        sx={{
+          flexWrap: 'wrap',
+          columnGap: '15px',
+        }}
+      >
         {plasticTypes.map((plasticType) => {
           return (
-            <PlasticType key={plasticType}>
+            <Box
+              key={plasticType}
+              sx={{
+                width: '50px',
+              }}
+            >
               {renderIcon(plasticType)}
-            </PlasticType>
+            </Box>
           )
         })}
       </Flex>
@@ -188,37 +136,45 @@ function renderPlasticTypes(plasticTypes: Array<PlasticTypeLabel>) {
   )
 }
 
-function renderOpeningHours(openingHours: Array<IOpeningHours>) {
-  return (
-    <div>
-      <h4>We're open on:</h4>
-      {openingHours.map((openingObj) => {
-        return (
-          <OpeningHours key={openingObj.day}>
-            {openingObj.day}: {openingObj.openFrom} - {openingObj.openTo}
-          </OpeningHours>
-        )
-      })}
-    </div>
-  )
-}
+const renderOpeningHours = (openingHours: Array<IOpeningHours>) => (
+  <div>
+    <h4>We're open on:</h4>
+    {openingHours.map((openingObj) => {
+      return (
+        <p key={openingObj.day}>
+          {openingObj.day}: {openingObj.openFrom} - {openingObj.openTo}
+        </p>
+      )
+    })}
+  </div>
+)
 
-function renderMachineBuilderXp(machineBuilderXp: Array<IMAchineBuilderXp>) {
-  return (
-    <>
-      <h4>We offer the following services:</h4>
-      {machineBuilderXp.map((machineExperience, index) => {
-        return (
-          <MachineExperienceTab key={`machineXp-${index}`}>
-            {machineExperience}
-          </MachineExperienceTab>
-        )
-      })}
-    </>
-  )
-}
+const renderMachineBuilderXp = (machineBuilderXp: Array<IMAchineBuilderXp>) => (
+  <>
+    <h4>We offer the following services:</h4>
+    {machineBuilderXp.map((machineExperience, index) => {
+      return (
+        <Box
+          sx={{
+            backgroundColor: 'background',
+            borderColor: 'background',
+            borderRadius: '5px',
+            borderStyle: 'solid',
+            borderWidth: '1px',
+            display: 'inline-block',
+            marginRight: '10px',
+            padding: '10px',
+          }}
+          key={`machineXp-${index}`}
+        >
+          {machineExperience}
+        </Box>
+      )
+    })}
+  </>
+)
 
-export const SpaceProfile = ({ user }: IProps) => {
+export const SpaceProfile = ({ user, docs }: IProps) => {
   let coverImage = [
     <SliderImage
       key="default-image"
@@ -239,19 +195,38 @@ export const SpaceProfile = ({ user }: IProps) => {
     )
   }
 
+  const stats = userStats(user.userName)
+
   const userLinks = user?.links.filter(
     (linkItem) => !['discord', 'forum'].includes(linkItem.label),
   )
 
   const userCountryCode =
-    user.location?.countryCode || user.country?.toLowerCase() || null
+    user.location?.countryCode || user.country?.toLowerCase() || undefined
 
   return (
-    <ProfileWrapper mt={4} mb={6}>
-      <ProfileWrapperCarousel>
+    <Container
+      mt={4}
+      mb={6}
+      sx={{
+        border: '2px solid black',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        maxWidth: '1000px',
+      }}
+      data-cy="SpaceProfile"
+    >
+      <Box sx={{ lineHeight: 0 }}>
         <Slider {...sliderSettings}>{coverImage}</Slider>
-      </ProfileWrapperCarousel>
-      <ProfileContentWrapper mt={['-122px', '-122px', 0]} px={[2, 4]} py={4}>
+      </Box>
+      <Flex
+        sx={{
+          px: [2, 4],
+          py: 4,
+          background: 'white',
+          borderTop: '2px solid',
+        }}
+      >
         <Box sx={{ width: ['100%', '100%', '80%'] }}>
           <Box sx={{ display: ['block', 'block', 'none'] }}>
             <MobileBadge>
@@ -262,26 +237,16 @@ export const SpaceProfile = ({ user }: IProps) => {
           <Flex
             sx={{
               alignItems: 'center',
-              pt: ['40px', '40px', '0'],
+              pt: ['0', '40px', '0'],
             }}
           >
-            {userCountryCode && (
-              <FlagIcon
-                mr={2}
-                code={userCountryCode}
-                style={{ display: 'inline-block' }}
-              />
-            )}
-            <Text
-              my={2}
-              sx={{
-                color: `${theme.colors.lightgrey} !important`,
-                fontSize: 3,
+            <Username
+              user={{
+                userName: user.userName,
+                countryCode: userCountryCode,
               }}
-              data-cy="userName"
-            >
-              {user.userName}
-            </Text>
+              isVerified={stats.verified}
+            />
           </Flex>
 
           <Flex sx={{ alignItems: 'center' }}>
@@ -294,20 +259,7 @@ export const SpaceProfile = ({ user }: IProps) => {
               {user.displayName}
             </Heading>
           </Flex>
-          {user.about && (
-            <Text
-              mt="0"
-              mb="20px"
-              color={theme.colors.grey}
-              sx={{
-                ...theme.typography.paragraph,
-                width: ['80%', '100%'],
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {user.about}
-            </Text>
-          )}
+          {user.about && <Paragraph>{user.about}</Paragraph>}
 
           {user.profileType === ProfileType.COLLECTION_POINT &&
             user.collectedPlasticTypes &&
@@ -335,10 +287,25 @@ export const SpaceProfile = ({ user }: IProps) => {
           <MobileBadge>
             <MemberBadge size={150} profileType={user.profileType} />
 
-            <UserStats user={user} />
+            <Box
+              sx={{
+                mt: 3,
+              }}
+            >
+              <UserStatistics
+                userName={user.userName}
+                country={user.location?.country}
+                isVerified={stats.verified}
+                isSupporter={!!user.badges?.supporter}
+                howtoCount={docs?.howtos.length || 0}
+                usefulCount={stats.totalUseful}
+                researchCount={docs?.research.length || 0}
+              />
+            </Box>
           </MobileBadge>
         </Box>
-      </ProfileContentWrapper>
-    </ProfileWrapper>
+      </Flex>
+      <UserCreatedDocuments docs={docs} />
+    </Container>
   )
 }

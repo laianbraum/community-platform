@@ -7,11 +7,7 @@ import type { DatabaseV2 } from '../databaseV2'
  * List of existing aggregation docs
  * TODO - refactor to shared list (search targetDocId)
  */
-const AGGREGATION_DOC_IDS = [
-  'users_votedUsefulHowtos',
-  'users_votedUsefulResearch',
-  'users_verified',
-] as const
+const AGGREGATION_DOC_IDS = ['users_totalUseful', 'users_verified'] as const
 
 // Utility types generated from list of aggregation docs ids
 type IAggregationId = typeof AGGREGATION_DOC_IDS[number]
@@ -44,9 +40,13 @@ export class AggregationsStore {
     makeAutoObservable(this, { aggregations: observable })
   }
 
-  @action
-  private updateAggregationValue(aggregationId: IAggregationId, value: any) {
-    this.aggregations[aggregationId] = value
+  /**
+   * fetch specific value for aggregation given id and aggregationid
+   */
+  public getAggregationValue(aggregationId: IAggregationId, id: string) {
+    const aggregation = this.aggregations[aggregationId]
+    if (!aggregation) return null
+    return aggregation[id] || null
   }
 
   /**
@@ -57,7 +57,9 @@ export class AggregationsStore {
     aggregationId: IAggregationId,
     timeoutDuration = DEFAULT_TIMEOUT,
   ) {
-    if (!this.subscriptions$.hasOwnProperty(aggregationId)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(this.subscriptions$, aggregationId)
+    ) {
       const subscription = this.db
         .collection('aggregations')
         .doc(aggregationId)
@@ -85,6 +87,11 @@ export class AggregationsStore {
     this.setSubscriptionTimeout(aggregationId, 0)
   }
 
+  @action
+  private updateAggregationValue(aggregationId: IAggregationId, value: any) {
+    this.aggregations[aggregationId] = value
+  }
+
   /**
    * Use window timeout methods to handle termination of subscriptions. Setting a new timeout on an
    * existing subscription will simply extend the time it is maintained for
@@ -94,7 +101,7 @@ export class AggregationsStore {
     timeoutDuration: number,
   ) {
     // remove any existing timeout
-    if (this.timeouts$.hasOwnProperty(aggregationId)) {
+    if (Object.prototype.hasOwnProperty.call(this.timeouts$, aggregationId)) {
       clearTimeout(this.timeouts$[aggregationId])
     }
     // add timeout to unsubscribe
@@ -104,7 +111,9 @@ export class AggregationsStore {
   }
 
   private clearSubscription(aggregationId: IAggregationId) {
-    if (this.subscriptions$.hasOwnProperty(aggregationId)) {
+    if (
+      Object.prototype.hasOwnProperty.call(this.subscriptions$, aggregationId)
+    ) {
       this.subscriptions$[aggregationId].unsubscribe()
       delete this.subscriptions$[aggregationId]
     }

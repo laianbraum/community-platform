@@ -1,6 +1,11 @@
 import type { DBClients, DBDoc } from './types'
 import { Observable } from 'rxjs'
 
+interface DocMetaOptions {
+  keep_modified_timestamp?: boolean
+  set_last_edit_timestamp?: boolean
+}
+
 export class DocReference<T> {
   public id: string
   constructor(
@@ -13,7 +18,7 @@ export class DocReference<T> {
 
   /**
    * Get the target document data. Returns `undefined` if doc does not exist
-   * @param source - Specify whether to fectch from cache or server.
+   * @param source - Specify whether to fetch from cache or server.
    * By default will first check cache, and if doesn't exist will fetch from server
    * This is usually sufficient as the cache is updated when full collection sync'd
    */
@@ -38,12 +43,12 @@ export class DocReference<T> {
    *  Stream live updates from a server (where supported)
    *  Just returns the doc when not supported
    */
-  stream(): Observable<DBDoc> {
+  stream(): Observable<T & DBDoc> {
     const { serverDB } = this.clients
     if (serverDB.streamDoc) {
       return serverDB.streamDoc<T>(`${this.endpoint}/${this.id}`)
     } else {
-      return new Observable<DBDoc>((subscriber) => {
+      return new Observable<T & DBDoc>((subscriber) => {
         this.get('server').then((res) => {
           subscriber.next(res)
           subscriber.complete()
@@ -59,11 +64,22 @@ export class DocReference<T> {
    * If contains metadata fields (e.g. `_id`)
    * then this will be used instead of generated id
    */
-  async set(data: T) {
+  async set(data: T, options?: DocMetaOptions) {
     const { serverDB, cacheDB } = this.clients
-    const dbDoc: DBDoc = this._setDocMeta(data)
+    const dbDoc: DBDoc = this._setDocMeta(data, options)
     await serverDB.setDoc(this.endpoint, dbDoc)
     await cacheDB.setDoc(this.endpoint, dbDoc)
+  }
+
+  /**
+   * Update data to the document. Will automatically populate with _modified timestamp
+   * @param data - specified update data in any format.
+   */
+  async update(data: T, options?: DocMetaOptions) {
+    const { serverDB, cacheDB } = this.clients
+    const dbDoc: DBDoc = this._setDocMeta(data, options, true)
+    await serverDB.updateDoc(this.endpoint, dbDoc)
+    await cacheDB.updateDoc(this.endpoint, dbDoc)
   }
 
   /**
@@ -90,15 +106,34 @@ export class DocReference<T> {
     return this._setDocMeta(data)
   }
 
-  private _setDocMeta(data: any = {}): DBDoc {
+  private _setDocMeta(
+    data: any = {},
+    options: any = {},
+    isDocUpdate = false,
+  ): DBDoc {
     const d = data
-    return {
+    const o = options
+    const modifiedTimestamp = o.keep_modified_timestamp
+      ? d._modified
+      : new Date().toISOString()
+
+    const meta = {
       ...d,
       _created: d._created ? d._created : new Date().toISOString(),
       _deleted: d._deleted ? d._deleted : false,
       _id: this.id,
-      _modified: new Date().toISOString(),
+      _modified: modifiedTimestamp,
     }
+
+    if (o.set_last_edit_timestamp)
+      meta._contentModifiedTimestamp = new Date().toISOString()
+
+    if (isDocUpdate) {
+      delete meta._created
+      delete meta._deleted
+    }
+
+    return meta
   }
 
   private _generateDocID() {

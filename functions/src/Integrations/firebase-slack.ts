@@ -13,8 +13,10 @@ export const notifyNewPin = functions.firestore
     const info = snapshot.data()
     const id = info._id
     const type = info.type
-    const loc = info.location
-    //  console.log(info);
+    const moderation = info.moderation
+
+    if (moderation !== 'awaiting-moderation') return
+
     request.post(
       SLACK_WEBHOOK_URL,
       {
@@ -54,32 +56,6 @@ export const notifyNewHowTo = functions.firestore
           console.error(err)
           return
         } else {
-          return res
-        }
-      },
-    )
-  })
-export const notifyNewEvent = functions.firestore
-  .document('v3_events/{id}')
-  .onCreate((snapshot, context) => {
-    const info = snapshot.data()
-    const user = info._createdBy
-    const url = info.url
-    const location = info.location.country
-    console.info(info)
-    request.post(
-      SLACK_WEBHOOK_URL,
-      {
-        json: {
-          text: `📅 Jeej new event in *${location}* by _${user}_ awaiting moderation, posted here:
-            ${url}`,
-        },
-      },
-      (err, res) => {
-        if (err) {
-          console.error(err)
-        } else {
-          console.log('post success')
           return res
         }
       },

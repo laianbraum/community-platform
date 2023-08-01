@@ -1,16 +1,16 @@
-import { HowtoStore } from './Howto/howto.store'
-import { UserStore } from './User/user.store'
-import { TemplateStore } from './_Template/template.store'
-import { TagsStore } from './Tags/tags.store'
-import { PlatformStore } from './Platform/platform.store'
-import { EventStore } from './Events/events.store'
-import { MapsStore } from './Maps/maps.store'
-import { DatabaseV2 } from './databaseV2'
-import { MobileMenuStore } from './MobileMenu/mobilemenu.store'
 import { AdminStore } from './Admin/admin.store'
-import { ThemeStore } from './Theme/theme.store'
 import { AggregationsStore } from './Aggregations/aggregations.store'
 import { CategoriesStore } from './Categories/categories.store'
+import { DatabaseV2 } from './databaseV2'
+import { HowtoStore } from './Howto/howto.store'
+import { MapsStore } from './Maps/maps.store'
+import { MobileMenuStore } from './MobileMenu/mobilemenu.store'
+import { PlatformStore } from './Platform/platform.store'
+import { ResearchCategoriesStore } from './ResearchCategories/researchCategories.store'
+import { TagsStore } from './Tags/tags.store'
+import { ThemeStore } from './Theme/theme.store'
+import { UserNotificationsStore } from './User/notifications.store'
+import { UserStore } from './User/user.store'
 
 export class RootStore {
   dbV2 = new DatabaseV2()
@@ -29,15 +29,15 @@ const stores = (rootStore: RootStore) => {
     aggregationsStore: new AggregationsStore(rootStore),
     howtoStore: new HowtoStore(rootStore),
     userStore: new UserStore(rootStore),
-    templateStore: new TemplateStore(rootStore),
     tagsStore: new TagsStore(rootStore),
     categoriesStore: new CategoriesStore(rootStore),
+    researchCategoriesStore: new ResearchCategoriesStore(rootStore),
     platformStore: new PlatformStore(rootStore),
     mobileMenuStore: new MobileMenuStore(rootStore),
-    eventStore: new EventStore(rootStore),
     mapsStore: new MapsStore(rootStore),
     adminStore: new AdminStore(rootStore),
     themeStore: new ThemeStore(),
+    userNotificationsStore: new UserNotificationsStore(rootStore),
   }
   return stores
 }
@@ -45,14 +45,14 @@ const stores = (rootStore: RootStore) => {
 export interface IStores {
   howtoStore: HowtoStore
   userStore: UserStore
-  templateStore: TemplateStore
   tagsStore: TagsStore
   categoriesStore: CategoriesStore
+  researchCategoriesStore: ResearchCategoriesStore
   platformStore: PlatformStore
   mobileMenuStore: MobileMenuStore
-  eventStore: EventStore
   mapsStore: MapsStore
   adminStore: AdminStore
   themeStore: ThemeStore
   aggregationsStore: AggregationsStore
+  userNotificationsStore: UserNotificationsStore
 }

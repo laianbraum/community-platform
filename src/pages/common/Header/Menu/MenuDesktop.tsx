@@ -4,7 +4,7 @@ import { getAvailablePageList } from 'src/pages/PageList'
 import { Flex } from 'theme-ui'
 import styled from '@emotion/styled'
 import MenuCurrent from 'src/assets/images/menu-current.svg'
-import { AuthWrapper } from 'src/components/Auth/AuthWrapper'
+import { AuthWrapper } from 'src/common/AuthWrapper'
 import { getSupportedModules } from 'src/modules'
 
 const MenuLink = styled(NavLink)`
@@ -26,7 +26,7 @@ const MenuLink = styled(NavLink)`
       display: block;
       position: absolute;
       bottom: -6px;
-      background-color: ${(props) => props.theme.colors.yellow.base};
+      background-color: ${(props) => props.theme.colors.accent.base};
       mask-size: contain;
       mask-image: url(${MenuCurrent});
       mask-repeat: no-repeat;

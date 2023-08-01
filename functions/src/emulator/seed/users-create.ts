@@ -1,13 +1,13 @@
-import { MOCK_AUTH_USERS } from '../../../../shared'
-import type { IUserDB } from '../../../../src/models'
-import { firebaseAdmin } from '../../Firebase/admin'
+import { MOCK_AUTH_USERS } from 'oa-shared/mocks/auth'
+import type { IUserDB } from '../../models'
+import { firebaseAuth } from '../../Firebase/auth'
 import { setDoc } from '../../Firebase/firestoreDB'
 
 /**
  * Create auth users to allow sign-in on firebase emulators
  */
 export async function seedUsersCreate() {
-  const auth = firebaseAdmin.auth()
+  const auth = firebaseAuth
   const createdUsers = []
   for (const user of Object.values(MOCK_AUTH_USERS)) {
     const { label, roles, email, password, uid } = user
@@ -38,12 +38,11 @@ export async function seedUsersCreate() {
       _id: uid,
       _created: '2022-01-30T18:51:57.719Z',
       _modified: '2022-01-30T18:51:57.719Z',
+      _contentModifiedTimestamp: '2022-01-30T18:51:57.719Z',
       _deleted: false,
       displayName: user.label,
       userName: uid,
       moderation: 'awaiting-moderation',
-      votedUsefulHowtos: {},
-      votedUsefulResearch: {},
       notifications: [],
       userRoles: roles,
       links: [],

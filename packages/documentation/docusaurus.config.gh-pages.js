@@ -1,8 +1,9 @@
+/* global module, require */
 module.exports = {
   title: 'OneArmy Community Platform',
   tagline: 'Developer Documentation',
-  url: 'https://onearmy.github.io/community-platform',
-  baseUrl: '/community-platform/',
+  url: 'https://docs.platform.onearmy.earth/',
+  baseUrl: '/',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -46,7 +47,7 @@ module.exports = {
           items: [
             {
               label: 'Discord',
-              href: 'https://discord.gg/up3nBbEbxY',
+              href: 'https://discord.gg/gJ7Yyk4',
             },
           ],
         },
@@ -73,7 +74,7 @@ module.exports = {
           routeBasePath: '/',
           // Please change this to your repo.
           editUrl:
-            'https://github.com/ONEARMY/community-platform/edit/master/documentation',
+            'https://github.com/ONEARMY/community-platform/edit/master/packages/documentation',
         },
         // blog: {
         //   showReadingTime: true,

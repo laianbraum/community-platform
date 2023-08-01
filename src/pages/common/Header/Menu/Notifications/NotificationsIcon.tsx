@@ -8,40 +8,34 @@ const IconWrapper = styled(Flex)`
   color: #000;
   width: 100%;
   font-size: 16px;
-  padding: 10px; 
+  padding: 10px;
   cursor: pointer;
-  
-  }
 `
 
-function NotificationsIcon({
+export const NotificationsIcon = ({
   onCLick,
   isMobileMenuActive,
   areThereNotifications,
-}) {
-  return (
-    <>
-      <IconWrapper
-        data-cy="toggle-notifications-modal"
-        ml={1}
-        onClick={onCLick}
-        style={
-          isMobileMenuActive
-            ? {
-                backgroundColor: '#e2edf7',
-                borderRadius: '5px',
-              }
-            : {}
-        }
-      >
-        <IconNotifications
-          color={areThereNotifications ? 'orange' : '#bfbfbf'}
-          height="25px"
-          width="25px"
-        />
-      </IconWrapper>
-    </>
-  )
-}
-
-export default NotificationsIcon
+}) => (
+  <>
+    <IconWrapper
+      data-cy="toggle-notifications-modal"
+      ml={1}
+      onClick={onCLick}
+      style={
+        isMobileMenuActive
+          ? {
+              backgroundColor: '#e2edf7',
+              borderRadius: '5px',
+            }
+          : {}
+      }
+    >
+      <IconNotifications
+        color={areThereNotifications ? 'orange' : '#bfbfbf'}
+        height="25px"
+        width="25px"
+      />
+    </IconWrapper>
+  </>
+)

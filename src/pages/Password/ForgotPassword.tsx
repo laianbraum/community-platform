@@ -1,16 +1,8 @@
 import React from 'react'
-import { Card, Flex, Heading } from 'theme-ui'
-import styled from '@emotion/styled'
-import theme from 'src/themes/styled.theme'
+import { Card, Flex, Heading, Label } from 'theme-ui'
 import { Button, FieldInput } from 'oa-components'
 import { Form, Field } from 'react-final-form'
 import { logger } from 'workbox-core/_private'
-
-const Label = styled.label`
- font-size: ${theme.fontSizes[2] + 'px'}
- margin-bottom: ${theme.space[2] + 'px'}
- display: block;
-`
 
 interface IFormValues {
   email: string
@@ -105,7 +97,7 @@ class ForgotPasswordPage extends React.Component<IProps, IState> {
                   </Flex>
                 </Card>
                 <Flex mt={3} sx={{ justifyContent: 'flex-end' }}>
-                  <Button variant="tertiary">Close</Button>
+                  <Button variant={'outline'}>Close</Button>
                 </Flex>
               </Flex>
             </Flex>

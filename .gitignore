@@ -5,6 +5,8 @@ node_modules
 
 # testing
 /coverage
+/reports
+/junit.xml
 
 functions/service.json
 functions/backup.json
@@ -32,7 +34,6 @@ yarn-error.log*
 # IntelliJ
 /.idea
 functions/firebase-debug.log
-.env-*
 
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .yarn/*

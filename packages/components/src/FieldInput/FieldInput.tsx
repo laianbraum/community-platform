@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { FieldRenderProps } from 'react-final-form'
 import { Text, Input } from 'theme-ui'
+import { CharacterCount } from '../CharacterCount/CharacterCount'
 
 type FieldProps = FieldRenderProps<any, any> & { children?: React.ReactNode }
 
@@ -7,6 +9,7 @@ export interface Props extends FieldProps {
   // additional fields intending to pass down
   disabled?: boolean
   children?: React.ReactNode
+  showCharacterCount?: boolean
   'data-cy'?: string
   customOnBlur?: (event: any) => void
 }
@@ -32,8 +35,12 @@ export const FieldInput = ({
   disabled,
   modifiers,
   customOnBlur,
+  showCharacterCount,
+  minLength,
+  maxLength,
   ...rest
 }: Props) => {
+  const [curLength, setLength] = useState<number>(input?.value?.length ?? 0)
   return (
     <>
       <Input
@@ -41,6 +48,8 @@ export const FieldInput = ({
         variant={meta?.error && meta?.touched ? 'textareaError' : 'textarea'}
         {...input}
         {...rest}
+        minLength={minLength}
+        maxLength={maxLength}
         onBlur={(e) => {
           if (modifiers) {
             e.target.value = processInputModifiers(e.target.value, modifiers)
@@ -51,11 +60,22 @@ export const FieldInput = ({
           }
           input.onBlur()
         }}
+        onChange={(ev) => {
+          showCharacterCount && setLength(ev.target.value.length)
+          input.onChange(ev)
+        }}
       />
       {meta.error && meta.touched && (
         <Text sx={{ fontSize: 0, margin: 1, color: 'error' }}>
           {meta.error}
         </Text>
+      )}
+      {showCharacterCount && maxLength && (
+        <CharacterCount
+          currentSize={curLength}
+          minSize={minLength}
+          maxSize={maxLength}
+        />
       )}
     </>
   )

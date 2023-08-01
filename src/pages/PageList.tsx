@@ -9,33 +9,60 @@ import { AdminModule } from 'src/modules/admin'
  * Import all pages for use in lazy loading
  * NOTE - requires default export in page class (https://reactjs.org/docs/code-splitting.html#named-exports)
  */
-const HowtoPage = lazy(() => import('./Howto/Howto'))
-const SettingsPage = lazy(() => import('./Settings'))
+const HowtoPage = lazy(
+  () => import(/* webpackChunkName: "Howto" */ './Howto/Howto'),
+)
+const SettingsPage = lazy(
+  () => import(/* webpackChunkName: "Settings" */ './Settings'),
+)
 
-const AcademyPage = lazy(() => import('./Academy/Academy'))
-const EventsPage = lazy(() => import('./Events/Events'))
-const AdminPage = lazy(() => import('./admin/Admin'))
-const MapsPage = lazy(() => import('./Maps/Maps'))
-const User = lazy(() => import('./User/User'))
+const AcademyPage = lazy(
+  () => import(/* webpackChunkName: "Academy" */ './Academy/Academy'),
+)
+const MapsPage = lazy(
+  () => import(/* webpackChunkName: "Maps" */ './Maps/Maps'),
+)
+const User = lazy(() => import(/* webpackChunkName: "User" */ './User/User'))
 
-const SignUpMessagePage = lazy(() => import('./SignUp/SignUpMessage'))
+const SignUpMessagePage = lazy(
+  () =>
+    import(/* webpackChunkName: "SignUpMessage" */ './SignUp/SignUpMessage'),
+)
 const ResendSignUpMessagePage = lazy(
-  () => import('./SignUp/ResendSignUpMessage'),
+  () =>
+    import(
+      /* webpackChunkName: "ResendSignUpMessage" */ './SignUp/ResendSignUpMessage'
+    ),
 )
-const SignUpPage = lazy(() => import('./SignUp/SignUp'))
-const SignInPage = lazy(() => import('./SignIn/SignIn'))
-const ForgotPasswordPage = lazy(() => import('./Password/ForgotPassword'))
+const SignUpPage = lazy(
+  () => import(/* webpackChunkName: "SignUp" */ './SignUp/SignUp'),
+)
+const SignInPage = lazy(
+  () => import(/* webpackChunkName: "SignIn" */ './SignIn/SignIn'),
+)
+const ForgotPasswordPage = lazy(
+  () =>
+    import(
+      /* webpackChunkName: "ForgotPassword" */ './Password/ForgotPassword'
+    ),
+)
 const ForgotPasswordMessagePage = lazy(
-  () => import('./Password/ForgotPasswordMessage'),
+  () =>
+    import(
+      /* webpackChunkName: "ForgotPasswordMessage" */ './Password/ForgotPasswordMessage'
+    ),
 )
-const PrivacyPolicy = lazy(() => import('./policy/privacy'))
-const TermsPolicy = lazy(() => import('./policy/terms'))
+const PrivacyPolicy = lazy(
+  () => import(/* webpackChunkName: "privacy" */ './policy/privacy'),
+)
+const TermsPolicy = lazy(
+  () => import(/* webpackChunkName: "terms" */ './policy/terms'),
+)
 
-export function getAvailablePageList(supportedModules: MODULE[]): IPageMeta[] {
-  return COMMUNITY_PAGES.filter((pageItem) =>
+export const getAvailablePageList = (supportedModules: MODULE[]): IPageMeta[] =>
+  COMMUNITY_PAGES.filter((pageItem) =>
     supportedModules.includes(pageItem.moduleName),
   )
-}
 
 export interface IPageMeta {
   moduleName: MODULE
@@ -81,13 +108,7 @@ const academy = {
   },
   fullPageWidth: true,
 }
-const events = {
-  moduleName: MODULE.EVENTS,
-  path: '/events',
-  component: <EventsPage />,
-  title: 'Events',
-  description: 'Welcome to Events',
-}
+
 const maps = {
   moduleName: MODULE.MAP,
   path: '/map',
@@ -101,13 +122,6 @@ const maps = {
     width: '100vw',
   },
   fullPageWidth: true,
-}
-const admin = {
-  moduleName: MODULE.USER,
-  path: '/admin',
-  component: <AdminPage />,
-  title: 'Admin',
-  description: '',
 }
 
 const signup = {
@@ -175,13 +189,11 @@ const termsPolicy = {
 export const COMMUNITY_PAGES: IPageMeta[] = [
   howTo,
   maps,
-  events,
   academy,
   ResearchModule,
 ]
 /** Additional pages to show in signed-in profile dropdown */
 export const COMMUNITY_PAGES_PROFILE: IPageMeta[] = [settings, AdminModule]
-export const ADMIN_PAGES: IPageMeta[] = [admin]
 export const POLICY_PAGES: IPageMeta[] = [privacyPolicy, termsPolicy]
 export const NO_HEADER_PAGES: IPageMeta[] = [
   user,

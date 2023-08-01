@@ -2,7 +2,7 @@ context('map', () => {
   beforeEach(() => {
     cy.visit('/map')
   })
-  it('should navigate without log', () => {
-    // TODO add futher tests
+  it('should render an `accepted` pin', () => {
+    cy.get('[class*="leaflet-marker-icon"]').should('exist')
   })
 })

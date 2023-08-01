@@ -1,13 +1,10 @@
 import { PureComponent } from 'react'
-import Linkify from 'react-linkify'
-import ReactPlayer from 'react-player'
 import { Box, Card, Text, Flex, Heading } from 'theme-ui'
-import { ImageGallery } from 'src/components/ImageGallery/ImageGallery'
+import { ImageGallery, LinkifyText, VideoPlayer } from 'oa-components'
 import type { IHowtoStep } from 'src/models/howto.models'
 import type { IUploadedFileMeta } from 'src/stores/storage'
 import { capitalizeFirstLetter } from 'src/utils/helpers'
 import styled from '@emotion/styled'
-import theme from 'src/themes/styled.theme'
 
 interface IProps {
   step: IHowtoStep
@@ -45,7 +42,11 @@ export default class Step extends PureComponent<IProps> {
             }}
           >
             <Card sx={{ width: '100%' }}>
-              <Flex>
+              <Flex
+                sx={{
+                  flexDirection: ['column-reverse', 'column-reverse', 'row'],
+                }}
+              >
                 <Flex
                   py={4}
                   px={4}
@@ -56,32 +57,27 @@ export default class Step extends PureComponent<IProps> {
                 >
                   <Heading mb={0}>
                     {/* HACK 2021-07-16 - new howtos auto capitalize title but not older */}
-                    {capitalizeFirstLetter(step.title)}
+                    {step.title && capitalizeFirstLetter(step.title)}
                   </Heading>
                   <Box>
                     <Text
                       mt={3}
                       color={'grey'}
+                      variant="paragraph"
                       sx={{
-                        ...theme.typography.paragraph,
                         whiteSpace: 'pre-line',
                       }}
                     >
-                      <Linkify properties={{ target: '_blank' }}>
+                      <LinkifyText>
                         {/* HACK 2021-07-16 - new howtos auto capitalize title but not older */}
-                        {capitalizeFirstLetter(step.text)}
-                      </Linkify>
+                        {step.text && capitalizeFirstLetter(step.text)}
+                      </LinkifyText>
                     </Text>
                   </Box>
                 </Flex>
                 <Box sx={{ width: ['100%', '100%', `${(1 / 2) * 100}%`] }}>
                   {step.videoUrl ? (
-                    <ReactPlayer
-                      width="auto"
-                      data-cy="video-embed"
-                      controls
-                      url={step.videoUrl}
-                    />
+                    <VideoPlayer videoUrl={step.videoUrl} />
                   ) : (
                     <ImageGallery images={step.images as IUploadedFileMeta[]} />
                   )}

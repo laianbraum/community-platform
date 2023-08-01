@@ -1,10 +1,9 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
 
-import { Button, Modal } from 'oa-components'
-import { Flex, Box, Image, Text } from 'theme-ui'
+import { Button, Modal, OsmGeocoding } from 'oa-components'
+import { Flex, Box } from 'theme-ui'
 import filterIcon from 'src/assets/icons/icon-filters-mobile.png'
-import crossClose from 'src/assets/icons/cross-close.svg'
 
 import { GroupingFilterDesktop } from './GroupingFilterDesktop'
 import { GroupingFilterMobile } from './GroupingFilterMobile'
@@ -12,12 +11,10 @@ import { GroupingFilterMobile } from './GroupingFilterMobile'
 import type { IMapPinType } from 'src/models/maps.models'
 import { HashLink as Link } from 'react-router-hash-link'
 import type { Map } from 'react-leaflet'
-import theme from 'src/themes/styled.theme'
 import { inject } from 'mobx-react'
 import type { MapsStore } from 'src/stores/Maps/maps.store'
 import type { UserStore } from 'src/stores/User/user.store'
 import type { RouteComponentProps } from 'react-router'
-import OsmGeocoding from 'src/components/OsmGeocoding/OsmGeocoding'
 import { logger } from 'src/logger'
 import type { FilterGroup } from './transformAvailableFiltersToGroups'
 
@@ -41,12 +38,15 @@ const MapFlexBar = styled(Flex)`
   position: absolute;
   top: 25px;
   width: 100%;
-  z-index: ${theme.zIndex.mapFlexBar};
+  z-index: 2000;
   left: 50%;
   transform: translateX(-50%);
 `
 @inject('mapsStore', 'userStore')
 class Controls extends React.Component<IProps, IState> {
+  toggleFilterMobileModal = () => {
+    this.setState({ showFiltersMobile: !this.state.showFiltersMobile })
+  }
   constructor(props: IProps) {
     super(props)
     this.state = {
@@ -56,10 +56,6 @@ class Controls extends React.Component<IProps, IState> {
   }
   get injected() {
     return this.props as IInjectedProps
-  }
-
-  handleFilterMobileModal() {
-    this.setState({ showFiltersMobile: !this.state.showFiltersMobile })
   }
 
   public render() {
@@ -85,9 +81,9 @@ class Controls extends React.Component<IProps, IState> {
       >
         <Box
           sx={{
-            width: ['95%', '308px', '308px'],
+            width: ['95%', '95%', '308px'],
             height: '45px',
-            m: [0, '5px 0 0 20px'],
+            m: [0, 0, '5px 0 0 20px'],
           }}
         >
           <OsmGeocoding
@@ -135,12 +131,12 @@ class Controls extends React.Component<IProps, IState> {
           </Box>
         </Flex>
         <Box
-          sx={{ display: ['flex', 'none', 'none'], mt: '5px', width: '95%' }}
+          sx={{ display: ['flex', 'flex', 'none'], mt: '5px', width: '95%' }}
         >
           <Button
             sx={{ display: 'block', width: '100%' }}
-            variant="outline"
-            onClick={() => this.handleFilterMobileModal()}
+            variant="secondary"
+            onClick={this.toggleFilterMobileModal}
           >
             Filters
             {filtersSelected.length > 0 && (
@@ -154,19 +150,9 @@ class Controls extends React.Component<IProps, IState> {
           </Button>
         </Box>
         <Modal
-          onDidDismiss={() => this.handleFilterMobileModal()}
+          onDidDismiss={this.toggleFilterMobileModal}
           isOpen={showFiltersMobile}
         >
-          <Flex p={0} mx={-1} sx={{ justifyContent: 'space-between' }}>
-            <Text sx={{ fontWeight: 'bold' }}>Select filters</Text>
-            <Image
-              loading="lazy"
-              width="25px"
-              src={crossClose}
-              alt="cross-close"
-              onClick={() => this.handleFilterMobileModal()}
-            />
-          </Flex>
           <GroupingFilterMobile
             items={groupedFilters}
             selectedItems={filtersSelected}
@@ -174,6 +160,7 @@ class Controls extends React.Component<IProps, IState> {
               this.props.onFilterChange(selected as IMapPinType[])
               this.setState({ filtersSelected: selected })
             }}
+            onClose={this.toggleFilterMobileModal}
           />
         </Modal>
       </MapFlexBar>

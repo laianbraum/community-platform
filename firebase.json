@@ -8,6 +8,22 @@
         "function": "api"
       },
       {
+        "source": "/how-to/**",
+        "function": "seo-seoRender"
+      },
+      {
+        "source": "/_logging",
+        "function": "logToCloudLogging-logToCloudLogging"
+      },
+      {
+        "source": "/research/**",
+        "function": "seo-seoRender"
+      },
+      {
+        "source": "/sitemap.xml",
+        "function": "seo-sitemapProxy"
+      },
+      {
         "source": "/static/**",
         "destination": "/static/**"
       },
@@ -95,6 +111,9 @@
     },
     "storage": {
       "port": 4007
+    },
+    "pubsub": {
+      "port": 4008
     }
   },
   "storage": {
